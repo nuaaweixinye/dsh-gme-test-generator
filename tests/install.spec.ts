@@ -21,7 +21,7 @@ import { Context } from '@deepseek-ai/cordis'
 import Loader, { type EntryOptions } from '@deepseek-ai/cordis-plugin-loader'
 import { applyEntryPatches, type PatchOptions } from '@deepseek-ai/cordis-plugin-include'
 import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
+import SystemPrompt, { type PromptSection } from '@deepseek-ai/dsh-system-prompt'
 import Tools from '@deepseek-ai/dsh-tools'
 import * as Workflow from '../src/index.ts'
 
@@ -111,12 +111,18 @@ async function checkoutFixture(): Promise<string> {
  * Mount one composed row through a real Loader, exactly as boot does, but with
  * the module pipeline stubbed instead of reaching the profile's node_modules.
  */
-async function mount(row: EntryOptions): Promise<{ ctx: Context; imported: string[] }> {
+async function mount(row: EntryOptions): Promise<{ ctx: Context; imported: string[]; sections: PromptSection[] }> {
   const ctx = new Context()
   cleanups.push(() => ctx.fiber.dispose())
   await ctx.plugin(SystemPrompt)
   await ctx.plugin(Tools)
   await ctx.plugin(Loader)
+  const sections: PromptSection[] = []
+  const original = ctx.systemPrompt.section.bind(ctx.systemPrompt)
+  ctx.systemPrompt.section = ((section: PromptSection) => {
+    sections.push(section)
+    return original(section)
+  }) as typeof ctx.systemPrompt.section
   const imported: string[] = []
   ctx.loader.internal = {
     version: 'v2',
@@ -128,7 +134,7 @@ async function mount(row: EntryOptions): Promise<{ ctx: Context; imported: strin
   } as unknown as NonNullable<typeof ctx.loader.internal>
   await ctx.loader.create(row)
   await ctx.loader.await()
-  return { ctx, imported }
+  return { ctx, imported, sections }
 }
 
 function call(ctx: Context, name: string, args: unknown) {
@@ -158,7 +164,10 @@ describe('the committed dsh.bundle.patch', () => {
   it('carries the deployment paths as expressions, never as machine paths', async () => {
     const row = await insertedRow()
     expect((row.config as Record<string, unknown>).backendRoot).toEqual({ __jsExpr: `process.env.${ROOT_ENV} ?? ''` })
-    expect(row.disabled).toEqual({ __jsExpr: `!process.env.${ROOT_ENV}` })
+    // The row is mounted even when nothing is configured, so it must not carry a
+    // guard: the plugin answers an unconfigured install with setup guidance
+    // instead of staying unloaded.
+    expect(row.disabled).toBeUndefined()
     // Comments may show example paths; the YAML values must not bake in the
     // author's machine.
     const values = (await patchText())
@@ -171,11 +180,19 @@ describe('the committed dsh.bundle.patch', () => {
 })
 
 describe('a freshly installed, unconfigured row', () => {
-  it('stays inert and never imports the plugin when the checkout is unset', async () => {
+  it('mounts the plugin, registers no tools, and tells the model how to configure it', async () => {
     setEnv(ROOT_ENV, undefined)
-    const { ctx, imported } = await mount(await insertedRow())
-    expect(imported).toEqual([])
+    const { ctx, imported, sections } = await mount(await insertedRow())
+    // The module must load: a setup hint can only reach the model from a plugin
+    // that is actually mounted.
+    expect(imported).toEqual([PACKAGE_NAME])
     expect((await call(ctx, 'gme_check', { resource: 'jobs' })).isError).toBe(true)
+    expect(sections).toHaveLength(1)
+    expect(sections[0]?.name).toBe('gme-workflow')
+    expect(sections[0]?.text).toMatch(/NOT available/)
+    expect(sections[0]?.text).toContain('https://github.com/nuaaweixinye/gme-agent')
+    expect(sections[0]?.text).toContain('GME_TEST_AGENT_ROOT')
+    expect(sections[0]?.text).toMatch(/install\.ps1/)
   })
 })
 

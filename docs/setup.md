@@ -50,13 +50,12 @@ $env:GME_TEST_AGENT_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'
 dsh web
 ```
 
-These are read at start: changing them requires a restart. Or override the row in the profile patch (`$DSH_HOME/profiles/web/cordis.patch.yml`) and remember that a config-only override keeps the shipped `!!js` guard, so `disabled: false` is required:
+These are read at start: changing them requires a restart. Or override the row in the profile patch (`$DSH_HOME/profiles/web/cordis.patch.yml`); a patch row replaces only the keys it names, so keep every field you still want:
 
 ```yaml
 - id: gme-workflow
-  disabled: false
   config:
-    backendRoot: D:/workspace/gme-test-agent
+    backendRoot: D:/workspace/gme-agent
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
     port: 8765
     autoStart: true
@@ -74,9 +73,8 @@ The composed tree prints the `gme-workflow` row with its `!!js` expressions verb
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| No `gme_*` tools after a restart, plugin listed as conditional/not running | `backendRoot` unset, so the shipped guard kept the row off | Set `GME_TEST_AGENT_ROOT` before starting Harness, or override the row with `disabled: false` and an explicit `backendRoot` |
-| No `gme_*` tools, but the row is enabled | A profile override enabled the row without a path; the plugin logs `backendRoot is not configured` and registers nothing | Give the row a `backendRoot`, or unset `disabled: false` again |
-| `dsh: 1 entry did not activate` at boot, naming this entry | A hand-edited row whose config fails validation (for example `backendRoot: null` in an `!!js` expression) | Fix or remove the override; the shipped row is inert, not fatal |
+| No `gme_*` tools after a restart — the plugin is running but registers none, and logs `backendRoot is not configured` | `backendRoot` unset, so the row resolved to an empty path | Set `GME_TEST_AGENT_ROOT` before starting Harness, or override the row with an explicit `backendRoot`. The model has been told these steps and will report them if the user asks |
+| `dsh: 1 entry did not activate` at boot, naming this entry | A hand-edited row whose config fails validation (for example `backendRoot: null` in an `!!js` expression) | Fix or remove the override; the shipped row degrades to "unconfigured", it never throws |
 | `Cannot read GME API token file: …` | `tokenFile` missing while `autoStart: false` | Create the token file (≥32 characters) or allow automatic startup |
 | `GME autoStart requires a Harness subprocess provider` | The profile has no local `subprocess` service | Use a base-backed profile, which provides one |
 | `GME backend is unavailable. Start GME Test Agent or enable autoStart.` | Nothing is listening on the port and automatic startup is off | Start the backend yourself, or set `autoStart: true` |

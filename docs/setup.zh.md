@@ -50,13 +50,12 @@ $env:GME_TEST_AGENT_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'
 dsh web
 ```
 
-这些值在启动时读取：改动后需要重启。要么在 profile 补丁（`$DSH_HOME/profiles/web/cordis.patch.yml`）里覆盖该条目——注意只覆盖 `config` 会保留随包发布的 `!!js` 守卫，因此必须写 `disabled: false`：
+这些值在启动时读取：改动后需要重启。要么在 profile 补丁（`$DSH_HOME/profiles/web/cordis.patch.yml`）里覆盖该条目——补丁条目只替换它写明的键，所以想保留的字段要全部重述：
 
 ```yaml
 - id: gme-workflow
-  disabled: false
   config:
-    backendRoot: D:/workspace/gme-test-agent
+    backendRoot: D:/workspace/gme-agent
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
     port: 8765
     autoStart: true
@@ -74,9 +73,8 @@ dsh --profile web --dump-config
 
 | 现象 | 原因 | 处理 |
 |---|---|---|
-| 重启后没有 `gme_*` 工具，插件显示为条件启用/未运行 | 未设置 `backendRoot`，随包守卫让该条目保持关闭 | 启动 Harness 前设置 `GME_TEST_AGENT_ROOT`，或用 `disabled: false` 加明确的 `backendRoot` 覆盖该条目 |
-| 没有 `gme_*` 工具，但条目是启用的 | profile 覆盖启用了条目却没给路径；插件会记录 `backendRoot is not configured` 并且不注册任何内容 | 给条目补上 `backendRoot`，或去掉 `disabled: false` |
-| 启动时报 `dsh: 1 entry did not activate` 并指出该条目 | 手工改过的条目配置校验失败（例如 `!!js` 表达式里的 `backendRoot: null`） | 修正或删除该覆盖；随包条目是惰性的，不会致命 |
+| 重启后没有 `gme_*` 工具：插件在运行但不注册任何工具，并记录 `backendRoot is not configured` | 未设置 `backendRoot`，条目解析为空路径 | 启动 Harness 前设置 `GME_TEST_AGENT_ROOT`，或用明确的 `backendRoot` 覆盖该条目。模型已经被告知这些步骤，用户问起时它会说明 |
+| 启动时报 `dsh: 1 entry did not activate` 并指出该条目 | 手工改过的条目配置校验失败（例如 `!!js` 表达式里的 `backendRoot: null`） | 修正或删除该覆盖；随包条目只会退化为“未配置”，不会抛错 |
 | `Cannot read GME API token file: …` | `autoStart: false` 而 `tokenFile` 不存在 | 创建 token 文件（≥32 字符），或允许自动启动 |
 | `GME autoStart requires a Harness subprocess provider` | profile 没有本机 `subprocess` 服务 | 使用基于 base 的 profile，它自带该服务 |
 | `GME backend is unavailable. Start GME Test Agent or enable autoStart.` | 端口上没有服务，且自动启动关闭 | 自行启动后端，或设 `autoStart: true` |

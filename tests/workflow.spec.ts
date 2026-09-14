@@ -9,7 +9,7 @@ import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
 import { ToolCallId } from '@deepseek-ai/dsh-llm'
-import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
+import SystemPrompt, { type PromptSection } from '@deepseek-ai/dsh-system-prompt'
 import Tools from '@deepseek-ai/dsh-tools'
 import * as Workflow from '../src/index.ts'
 
@@ -188,7 +188,7 @@ describe('GME workflow tools', () => {
     expect((await call('gme_check', { resource: 'jobs' })).isError).toBe(true)
     expect(requests).toHaveLength(0)
   })
-  it('warns once with the configuration guidance when backendRoot is blank', async () => {
+  it('warns once and publishes the setup procedure when backendRoot is blank', async () => {
     const root = await mkdtemp(join(tmpdir(), 'gme-blank-'))
     cleanups.push(() => rm(root, { recursive: true, force: true }))
     const ctx = new Context()
@@ -196,8 +196,23 @@ describe('GME workflow tools', () => {
     const warn = vi.spyOn(ctx.logger, 'warn')
     await ctx.plugin(SystemPrompt)
     await ctx.plugin(Tools)
+    const sections: PromptSection[] = []
+    const original = ctx.systemPrompt.section.bind(ctx.systemPrompt)
+    ctx.systemPrompt.section = ((section: PromptSection) => {
+      sections.push(section)
+      return original(section)
+    }) as typeof ctx.systemPrompt.section
     await ctx.plugin(Workflow, { backendRoot: '   ' })
     expect(warn).toHaveBeenCalledTimes(1)
     expect(String(warn.mock.calls[0]?.[0])).toMatch(/GME_TEST_AGENT_ROOT/)
+    // The model has to learn how to finish the setup: the tools are absent, and
+    // no other surface describes them.
+    expect(sections).toHaveLength(1)
+    expect(sections[0]?.name).toBe('gme-workflow')
+    expect(sections[0]?.text).toMatch(/NOT available/)
+    expect(sections[0]?.text).toContain('https://github.com/nuaaweixinye/gme-agent')
+    expect(sections[0]?.text).toMatch(/install\.ps1/)
+    expect(sections[0]?.text).toContain('- id: gme-workflow')
+    expect(sections[0]?.text).toMatch(/generate_interface_catalog\.py/)
   })
 })

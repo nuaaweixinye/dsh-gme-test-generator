@@ -27,12 +27,12 @@ The command installs the package and appends it to the profile's `dsh.profile.bu
 
 ## Configure
 
-`backendRoot` is a deployment path, so it has no default and is never a model argument. Until it is set, the inserted row stays **disabled** (an `!!js` guard) and the plugin registers nothing — an unconfigured install is inert, never fatal.
+`backendRoot` is a deployment path, so it has no default and is never a model argument. While it is unset the plugin **is still mounted**: it registers no tools, logs one warning, and publishes the setup procedure to the model, so an agent asked for a GME task can explain what is missing and how to finish the setup instead of answering "no such tool". It never throws — a row whose config fails validation would take the whole plugin tree down with it.
 
 **Option 1 — environment variables**, read when Harness starts:
 
 ```powershell
-$env:GME_TEST_AGENT_ROOT  = 'D:/workspace/gme-test-agent'
+$env:GME_TEST_AGENT_ROOT  = 'D:/workspace/gme-agent'
 $env:GME_TEST_AGENT_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'   # optional, default 'python'
 dsh web
 ```
@@ -41,19 +41,18 @@ dsh web
 
 ```yaml
 - id: gme-workflow
-  disabled: false            # required: a config-only override keeps the `!!js` guard
   config:
-    backendRoot: D:/workspace/gme-test-agent
+    backendRoot: D:/workspace/gme-agent
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
     port: 8765
     autoStart: true
 ```
 
-A patch row replaces only the keys it names, entire `config` included, and leaves other keys alone — which is why the guard has to be turned off explicitly when you supply paths this way.
+A patch row replaces only the keys it names, entire `config` included, so restate every field you keep. Restart `dsh web` afterwards; the tools appear as soon as a `backendRoot` resolves.
 
 | Config key | Default | Meaning |
 |---|---|---|
-| `backendRoot` | *(required)* | GME Test Agent checkout holding `backend/run_backend.py` |
+| `backendRoot` | *(required to enable the tools)* | GME Test Agent checkout holding `backend/run_backend.py` |
 | `pythonPath` | `python` | Interpreter with the backend's dependencies |
 | `configFile` | `config.local.json` | Backend config, absolute or relative to `backendRoot` |
 | `tokenFile` | `logs/web-api-token.log` | API token; created on automatic startup when missing |

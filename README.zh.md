@@ -27,12 +27,12 @@ dsh plugin --profile web add dsh-gme-workflow
 
 ## 配置
 
-`backendRoot` 是部署路径，没有默认值，也永远不会作为模型参数暴露。在设置它之前，插入的条目保持**停用**状态（`!!js` 守卫），插件不注册任何内容——未配置的安装是惰性的，绝不会导致启动失败。
+`backendRoot` 是部署路径，没有默认值，也永远不会作为模型参数暴露。未配置时插件**仍然挂载**：它不注册任何工具、只记一条 warning，并把整套配置步骤写给模型——这样用户问到 GME 工作流时，模型能说清缺什么、怎么补，而不是回答“没有这个工具”。它绝不抛错：配置校验失败的行会把整棵插件树拖垮。
 
 **方式一 —— 环境变量**，在 Harness 启动时读取：
 
 ```powershell
-$env:GME_TEST_AGENT_ROOT  = 'D:/workspace/gme-test-agent'
+$env:GME_TEST_AGENT_ROOT  = 'D:/workspace/gme-agent'
 $env:GME_TEST_AGENT_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'   # 可选，默认 'python'
 dsh web
 ```
@@ -41,15 +41,14 @@ dsh web
 
 ```yaml
 - id: gme-workflow
-  disabled: false            # 必须写：只覆盖 config 会保留上面的 `!!js` 守卫
   config:
-    backendRoot: D:/workspace/gme-test-agent
+    backendRoot: D:/workspace/gme-agent
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
     port: 8765
     autoStart: true
 ```
 
-补丁条目只替换它写明的键（`config` 整体替换），其他键保持原样——这正是用这种方式给路径时必须显式关掉守卫的原因。
+补丁条目只替换它写明的键（`config` 整体替换），因此要保留的字段需全部重述。之后重启 `dsh web`；一旦 `backendRoot` 能解析出路径，三个工具就会出现。
 
 | 配置键 | 默认值 | 含义 |
 |---|---|---|

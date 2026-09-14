@@ -26,7 +26,7 @@ try {
   await ctx.plugin(SystemPrompt)
   await ctx.plugin(Tools)
   // An empty backendRoot must mount without throwing: a throw here would fail
-  // the whole plugin tree at boot rather than merely disabling these tools.
+  // the whole plugin tree at boot rather than leaving the tools unregistered.
   await ctx.plugin(Workflow, { backendRoot: '' })
   const result = await ctx.tools.execute({
     name: 'gme_check',
@@ -35,7 +35,7 @@ try {
     callId: 'pack-smoke',
   })
   assert.equal(result.isError, true, 'an unconfigured plugin must not register its tools')
-  process.stdout.write('lib/index.js: OK (surface complete, unconfigured mount inert)\n')
+  process.stdout.write('lib/index.js: OK (surface complete, unconfigured mount publishes setup guidance)\n')
 } finally {
   await ctx.fiber.dispose()
 }
