@@ -11,8 +11,8 @@
 ```powershell
 git clone https://github.com/nuaaweixinye/gme-agent.git
 cd gme-agent
-scripts\setup_source.ps1   # 安装依赖并生成 config.local.json
-scripts\run_web.ps1        # 启动后端
+scripts\install.ps1 -GmeRepo D:\GME   # 自检工具链 → 建 .venv → 装两个钉住的 harness wheel 与 requirements → 写 config.local.json
+scripts\run_web.ps1                   # 启动后端
 ```
 
 其余说明见它的 README，包括用你自己的 GME 检出生成模块接口目录（`scripts/generate_interface_catalog.py`）——未生成时目录资源为空是预期行为，依赖目录的用例会自动跳过。完整检出（含生成的接口目录与内部笔记）为私有，访问权限由 [@nuaaweixinye](https://github.com/nuaaweixinye) 按人授予。
