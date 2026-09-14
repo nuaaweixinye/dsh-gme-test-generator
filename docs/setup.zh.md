@@ -6,6 +6,8 @@
 
 ## 1. GME Test Agent 源码目录
 
+先拿到这份检出本身。它**不随本插件分发、也未公开**：这是一个私有工程，访问权限由维护者按人授予——联系 [@nuaaweixinye](https://github.com/nuaaweixinye) 获取仓库访问权，然后按它自己的说明配置（`scripts/setup_source.ps1`，再 `scripts/run_web.ps1`）。
+
 你设为 `backendRoot` 的目录必须包含：
 
 - `backend/run_backend.py` —— 被托管的入口。

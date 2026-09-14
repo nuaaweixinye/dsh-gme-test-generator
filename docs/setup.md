@@ -6,6 +6,8 @@
 
 ## 1. The GME Test Agent checkout
 
+First, get the checkout itself. It is **not bundled with this plugin and is not published**: it is a private project, and access is granted per person by the maintainer — ask [@nuaaweixinye](https://github.com/nuaaweixinye) for access to the repository, then clone it and follow its own setup instructions (`scripts/setup_source.ps1`, then `scripts/run_web.ps1`).
+
 The directory you set as `backendRoot` must contain:
 
 - `backend/run_backend.py` — the managed entrypoint.
