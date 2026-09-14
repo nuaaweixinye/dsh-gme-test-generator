@@ -6,7 +6,16 @@
 
 ## 1. GME Test Agent 源码目录
 
-先拿到这份检出本身。它**不随本插件分发、也未公开**：这是一个私有工程，访问权限由维护者按人授予——联系 [@nuaaweixinye](https://github.com/nuaaweixinye) 获取仓库访问权，然后按它自己的说明配置（`scripts/setup_source.ps1`，再 `scripts/run_web.ps1`）。
+先拿到这份检出本身。它**不随本插件分发**。公开副本（framework 本体，不含 GME 专有生成数据）在 [nuaaweixinye/gme-agent](https://github.com/nuaaweixinye/gme-agent)：
+
+```powershell
+git clone https://github.com/nuaaweixinye/gme-agent.git
+cd gme-agent
+scripts\setup_source.ps1   # 安装依赖并生成 config.local.json
+scripts\run_web.ps1        # 启动后端
+```
+
+其余说明见它的 README，包括用你自己的 GME 检出生成模块接口目录（`scripts/generate_interface_catalog.py`）——未生成时目录资源为空是预期行为，依赖目录的用例会自动跳过。完整检出（含生成的接口目录与内部笔记）为私有，访问权限由 [@nuaaweixinye](https://github.com/nuaaweixinye) 按人授予。
 
 你设为 `backendRoot` 的目录必须包含：
 

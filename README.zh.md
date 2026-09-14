@@ -9,7 +9,7 @@
 ## 前置条件
 
 - DeepSeek Harness `0.1.x` 线上 `0.1.2-alpha.1` 或更新版本，且 profile 基于 base、提供 `tools` 与 `systemPrompt`。
-- 一份 GME Test Agent 源码目录，包含 `backend/run_backend.py`、`config.local.json`、任务数据库，以及它需要的 GME 仓库与编译工具链。**该工程不随本插件分发、也未公开**：它是私有检出，访问权限由维护者按人授予——联系 [@nuaaweixinye](https://github.com/nuaaweixinye)。
+- 一份 GME Test Agent 源码目录，包含 `backend/run_backend.py`、`config.local.json`、任务数据库，以及它需要的 GME 仓库与编译工具链。**该后端不随本插件分发**：它的公开副本（framework 本体，不含 GME 专有生成数据）在 [nuaaweixinye/gme-agent](https://github.com/nuaaweixinye/gme-agent)，克隆、配置与接口目录生成方式见它的 README。完整检出（额外含生成的接口目录与内部笔记）为私有，访问权限由 [@nuaaweixinye](https://github.com/nuaaweixinye) 按人授予。
 - 一个装好后端依赖的 Python 解释器，并在其中安装版本匹配的 `deepseek-harness-sdk` 与 `deepseek-harness-runtime-bin` wheel。
 - 若需要自动启动，profile 中要有本机 `subprocess` 服务（所有随附 profile 都有）。
 

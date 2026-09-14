@@ -6,7 +6,16 @@
 
 ## 1. The GME Test Agent checkout
 
-First, get the checkout itself. It is **not bundled with this plugin and is not published**: it is a private project, and access is granted per person by the maintainer — ask [@nuaaweixinye](https://github.com/nuaaweixinye) for access to the repository, then clone it and follow its own setup instructions (`scripts/setup_source.ps1`, then `scripts/run_web.ps1`).
+First, get the checkout itself. **It is not bundled with this plugin.** The public copy — the framework, without GME-specific generated data — is [nuaaweixinye/gme-agent](https://github.com/nuaaweixinye/gme-agent):
+
+```powershell
+git clone https://github.com/nuaaweixinye/gme-agent.git
+cd gme-agent
+scripts\setup_source.ps1   # installs dependencies, creates config.local.json
+scripts\run_web.ps1        # starts the backend
+```
+
+Its README covers the rest, including generating the module interface catalogs from your own GME checkout (`scripts/generate_interface_catalog.py`) — without them the catalog resource is empty by design, and the specs that read one skip. The full checkout, which carries those generated catalogs and the internal notes, is private; access is granted per person by [@nuaaweixinye](https://github.com/nuaaweixinye).
 
 The directory you set as `backendRoot` must contain:
 

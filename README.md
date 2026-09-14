@@ -9,7 +9,7 @@ This is a community plugin, not an official DeepSeek package, and it needs an ex
 ## Requirements
 
 - DeepSeek Harness `0.1.2-alpha.1` or newer on the `0.1.x` line, with a base-backed profile that provides `tools` and `systemPrompt`.
-- A GME Test Agent checkout containing `backend/run_backend.py`, its `config.local.json`, its task database, and the GME repository and compiler toolchain it needs. **That project is not bundled with this plugin and is not published here**: it is a private checkout, so access is granted per person by the maintainer — ask [@nuaaweixinye](https://github.com/nuaaweixinye).
+- A GME Test Agent checkout containing `backend/run_backend.py`, its `config.local.json`, its task database, and the GME repository and compiler toolchain it needs. **The backend is not bundled with this plugin**: its public copy — the framework, without GME-specific generated data — is [nuaaweixinye/gme-agent](https://github.com/nuaaweixinye/gme-agent), which documents cloning, configuration and how to generate the interface catalogs locally. The full checkout, which additionally carries those generated catalogs and the internal notes, is private: access is granted per person by [@nuaaweixinye](https://github.com/nuaaweixinye).
 - A Python interpreter with that backend's dependencies installed, plus matching `deepseek-harness-sdk` and `deepseek-harness-runtime-bin` wheels in it.
 - For automatic startup, a local `subprocess` service in the profile (every shipped profile has one).
 
