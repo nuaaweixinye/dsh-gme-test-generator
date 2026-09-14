@@ -1,0 +1,87 @@
+{
+  "name": "dsh-gme-workflow",
+  "version": "0.1.0",
+  "description": "GME Test Agent workflow tools for DeepSeek Harness: pick interfaces, run autonomous test generation and repair through a local Python backend, poll progress, and decide with consent.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "docs",
+    "README.md",
+    "README.zh.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "gme",
+    "test-generation",
+    "workflow"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nuaaweixinye/dsh-gme-workflow.git"
+  },
+  "homepage": "https://github.com/nuaaweixinye/dsh-gme-workflow",
+  "bugs": {
+    "url": "https://github.com/nuaaweixinye/dsh-gme-workflow/issues"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0",
+    "dsh": ">=0.1.2-alpha.1 <0.2.0-0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:pack": "node tests/pack-smoke.mjs",
+    "test:live": "node tests/live-smoke.mjs",
+    "verify": "npm run typecheck && npm run build && npm run test && npm run test:pack",
+    "prepare": "tsdown",
+    "prepack": "tsdown"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-subprocess": ">=0.1.2-alpha.1 <0.2.0-0",
+    "@deepseek-ai/dsh-system-prompt": ">=0.1.2-alpha.1 <0.2.0-0",
+    "@deepseek-ai/dsh-tools": ">=0.1.2-alpha.1 <0.2.0-0",
+    "@deepseek-ai/dsh-util-values": ">=0.1.2-alpha.1 <0.2.0-0",
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2",
+    "@deepseek-ai/cordis-plugin-include": "^1.0.7",
+    "@deepseek-ai/cordis-plugin-loader": "^1.0.3",
+    "@deepseek-ai/dsh-llm": "0.1.2-alpha.5",
+    "@deepseek-ai/dsh-subprocess": "0.1.2-alpha.5",
+    "@deepseek-ai/dsh-subprocess-local": "0.1.2-alpha.5",
+    "@deepseek-ai/dsh-system-prompt": "0.1.2-alpha.5",
+    "@deepseek-ai/dsh-tools": "0.1.2-alpha.5",
+    "@deepseek-ai/dsh-util-values": "0.1.2-alpha.5",
+    "@deepseek-ai/schemastery": "^3.18.2",
+    "@types/node": "^22.20.0",
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^4.1.0",
+    "tsdown": "^0.22.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

@@ -1,0 +1,7 @@
+# Build scripts stay blocked by default (pnpm ≥10). Nothing this package
+# builds or tests needs them: koffi and node-pty are optional native pieces of
+# @deepseek-ai/dsh-subprocess-local, and our own build runs through tsdown.
+allowBuilds:
+  '@deepseek-ai/dsh-subprocess-local': false
+  koffi: false
+  node-pty: false

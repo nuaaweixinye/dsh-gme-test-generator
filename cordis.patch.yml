@@ -1,0 +1,47 @@
+# dsh-gme-workflow bundle patch — the `dsh.bundle.patch` layer of this package.
+#
+#   dsh plugin --profile web add dsh-gme-workflow
+#
+# installs the package and appends `dsh-gme-workflow` to the profile's
+# `dsh.profile.bundles`; the next boot merges THIS patch (a single `insert` of
+# the plugin row). No profile file has to be edited by hand.
+#
+# The row stays disabled until a GME Test Agent checkout is configured.
+# `backendRoot` is a deployment path with no meaningful default, and a row whose
+# Config fails validation takes the whole plugin tree down with it — DSH reports
+# "dsh: 1 entry did not activate" and never starts. A fresh install must be
+# inert instead of fatal, so the guard below keeps the row off until
+# GME_TEST_AGENT_ROOT exists.
+#
+# Two ways to configure it.
+#
+# 1. Environment (the guard reads it):
+#      $env:GME_TEST_AGENT_ROOT  = 'D:/workspace/gme-test-agent'
+#      $env:GME_TEST_AGENT_PYTHON = 'C:/path/to/python.exe'   # optional, default 'python'
+#    These must be present when Harness STARTS, not when the tool is called.
+#
+# 2. A profile patch override. `- id:` replaces only the keys it names, whole
+#    `config` included, so an override that sets `config:` alone KEEPS the
+#    `disabled` expression above — write `disabled: false` too:
+#
+#      - id: gme-workflow
+#        disabled: false
+#        config:
+#          backendRoot: D:/workspace/gme-test-agent
+#          pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
+#          port: 8765
+#          autoStart: true
+#
+# Nothing else listens on `port`, and an independently started GME backend on
+# that port is reused rather than replaced.
+#
+# The guard expression is QUOTED because it starts with `!`: YAML reads an
+# unquoted `!!js !process.env.X` as a second tag and the file stops parsing.
+- insert:
+    - id: gme-workflow
+      name: 'dsh-gme-workflow'
+      disabled: !!js '!process.env.GME_TEST_AGENT_ROOT'
+      config:
+        backendRoot: !!js process.env.GME_TEST_AGENT_ROOT ?? ''
+        pythonPath: !!js process.env.GME_TEST_AGENT_PYTHON ?? 'python'
+        autoStart: true
