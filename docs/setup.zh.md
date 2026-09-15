@@ -81,3 +81,32 @@ dsh --profile web --dump-config
 | `The configured port is not an authenticated GME backend` | 端口已被其他服务占用 | 换一个空闲端口，或停止那个服务；插件不会在其上再启动一个 worker |
 | `GME backend exited during startup` | Python 入口立即退出 | 手工运行 `python backend/run_backend.py --config config.local.json` 看真实报错（依赖缺失、路径不对） |
 | 工具能调用但任务不推进 | 任务正在执行，或某次提交被中断 | 用 `gme_check` 轮询；超时后先查询任务再决定是否重发，因为 POST 不会自动重试 |
+
+## 6. 可选：知识注入与轨迹可观测
+
+后端支持在生成任务开始前把**本地历史分歧先验 + 知识库（WeKnora）参照**注入给编码会话，并把内层会话的工具调用记入任务事件。该能力**默认关闭**，全部在后端侧配置，与本插件的配置键无关：
+
+1. 在后端的 `config.local.json` 增加 `knowledge` 块（占位格式见后端仓库的 `config.example.json`）：
+
+   ```json
+   "knowledge": {
+     "enabled": true,
+     "weknora": {
+       "base_url": "http://<weknora-host>/api/v1",
+       "api_key_env": "WEKNORA_API_KEY",
+       "timeout_ms": 3000,
+       "knowledge_bases": [
+         { "label": "kb00", "id": "<kb00-knowledge-base-id>" }
+       ]
+     },
+     "budgets": { "max_priors": 8, "max_kb_hits": 6, "max_chars": 4000 },
+     "closed_loop": { "enabled": true, "min_stable_runs": 2 }
+   }
+   ```
+
+2. 后端**进程**的环境里要有 `api_key_env` 指向的变量（默认 `WEKNORA_API_KEY`）。
+3. 关闭时行为与旧版完全一致；开启后任何检索失败只降级（事件里记一条警告），绝不会让任务失败。
+
+**与本插件的唯一交点是托管进程的环境。** `autoStart` 启动的后端子进程只继承 `GME_AGENT_API_TOKEN` 一个变量——`WEKNORA_API_KEY` 不会到达它，知识库检索会以 `API key is not set` 降级（本地先验注入不受影响）。因此需要知识库检索时，请**自行启动后端**（`scripts\run_web.ps1` 从你的 shell 继承完整环境），把本插件的 `autoStart` 留作无人值守时的兜底；插件会在端口上发现你启动的后端并直接复用。
+
+判据、升格闭环与完整降级表见后端仓库的 `docs/knowledge-injection.md`。

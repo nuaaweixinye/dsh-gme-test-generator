@@ -15,6 +15,8 @@ This is a community plugin, not an official DeepSeek package, and it needs an ex
 
 The Python backend runs its coding work through the DeepSeek Harness Python SDK in a separate `sdk` profile. Build, tests and the memory audit run inside the backend as automatic stages of every task, not as chat actions. That coding profile includes file, search and PowerShell tools and excludes this plugin, so tasks never recurse.
 
+The backend repository ships its own reference docs: `docs/backend-overview.md` covers how it works and what it guarantees (the job lifecycle, action preconditions, the authoritative what-counts-as-passing rules, and the config reference), and `docs/knowledge-injection.md` describes its optional, **off-by-default** capability of injecting historical divergences and knowledge-base references before generation. That capability is configured in the backend's own `config.local.json`; the one intersection with this plugin is the owned worker's environment — see section 6 of the setup doc.
+
 ## Install
 
 From the plugin market (Settings → Plugin Market) — one click — or:

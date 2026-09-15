@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+Documentation only; no published package changes yet.
+
+- The READMEs point at the backend repository's own reference docs
+  (`docs/backend-overview.md`, `docs/knowledge-injection.md`) and summarise its
+  optional, off-by-default knowledge-injection capability.
+- `docs/setup.md` / `docs/setup.zh.md` gain section 6: how to enable knowledge
+  injection on the backend, and the one real intersection with this plugin — an
+  `autoStart`-owned worker inherits only `GME_AGENT_API_TOKEN`, so
+  `WEKNORA_API_KEY` never reaches it and KB retrieval degrades; start the
+  backend yourself if you want it.
+
 ## 0.1.1
 
 An unconfigured install can now tell the model how to finish its setup.

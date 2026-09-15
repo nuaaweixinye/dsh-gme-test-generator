@@ -81,3 +81,32 @@ The composed tree prints the `gme-workflow` row with its `!!js` expressions verb
 | `The configured port is not an authenticated GME backend` | Another service already holds `port` | Pick a free port, or stop that service; the plugin will not start a second worker over it |
 | `GME backend exited during startup` | The Python entrypoint failed immediately | Run `python backend/run_backend.py --config config.local.json` by hand to see the real error (missing dependencies, bad paths) |
 | Tool calls work but a task never progresses | The backend job is executing, or a submission was interrupted | Poll with `gme_check`; after a timeout, inspect tasks before resubmitting, because POSTs are never retried automatically |
+
+## 6. Optional: knowledge injection and trace observability
+
+The backend can inject **local historical-divergence priors plus knowledge-base (WeKnora) references** into the coding session before a generation task starts, and record the inner session's tool calls as task events. The capability is **off by default** and configured entirely on the backend side — none of this plugin's config keys are involved:
+
+1. Add a `knowledge` block to the backend's `config.local.json` (placeholder shape in the backend repo's `config.example.json`):
+
+   ```json
+   "knowledge": {
+     "enabled": true,
+     "weknora": {
+       "base_url": "http://<weknora-host>/api/v1",
+       "api_key_env": "WEKNORA_API_KEY",
+       "timeout_ms": 3000,
+       "knowledge_bases": [
+         { "label": "kb00", "id": "<kb00-knowledge-base-id>" }
+       ]
+     },
+     "budgets": { "max_priors": 8, "max_kb_hits": 6, "max_chars": 4000 },
+     "closed_loop": { "enabled": true, "min_stable_runs": 2 }
+   }
+   ```
+
+2. The variable named by `api_key_env` (default `WEKNORA_API_KEY`) must exist in the backend **process** environment.
+3. Off, the behaviour is byte-identical to the old backend; on, any retrieval failure only degrades (one warning event) and can never fail a task.
+
+**The one intersection with this plugin is the owned worker's environment.** A backend started by `autoStart` inherits exactly one variable — `GME_AGENT_API_TOKEN` — so `WEKNORA_API_KEY` never reaches it and knowledge-base retrieval degrades with `API key is not set` (local priors still inject). If you want KB retrieval, **start the backend yourself** (`scripts\run_web.ps1` inherits your full shell environment) and leave this plugin's `autoStart` as the unattended fallback; the plugin attaches to a backend it finds on the port instead of starting one.
+
+The criteria, the promotion loop and the full degradation table live in the backend repo's `docs/knowledge-injection.md`.
