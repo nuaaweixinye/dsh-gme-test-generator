@@ -1,14 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.1.2
 
-- The requirement list, both READMEs, the setup docs and the shipped setup
-  guidance now state that the backend insists on **clang-format 17.0.2** — the
-  version behind GME's own `check-format` target. The backend resolves the
-  formatter from the interpreter environment, then `clang_format_path`, then
-  PATH, and refuses a different version instead of reporting a format verdict the
-  GME pipeline may not agree with. A troubleshooting row covers the refusal.
-- Documentation only; the tools, schemas and transport are unchanged.
+Documentation and setup-guidance release; the tools, schemas and transport are
+unchanged, and the package still requires a GME Test Agent checkout.
 
 - The READMEs point at the backend repository's own reference docs
   (`docs/backend-overview.md`, `docs/knowledge-injection.md`) and summarise its
@@ -18,6 +13,12 @@
   `autoStart`-owned worker inherits only `GME_AGENT_API_TOKEN`, so
   `WEKNORA_API_KEY` never reaches it and KB retrieval degrades; start the
   backend yourself if you want it.
+- The requirement list, both READMEs, the setup docs and the shipped setup
+  guidance now state that the backend insists on **clang-format 17.0.2** — the
+  version behind GME's own `check-format` target. The backend resolves the
+  formatter from the interpreter environment, then `clang_format_path`, then
+  PATH, and refuses a different version instead of reporting a format verdict the
+  GME pipeline may not agree with. A troubleshooting row covers the refusal.
 
 ## 0.1.1
 
