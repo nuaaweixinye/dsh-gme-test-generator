@@ -30,6 +30,14 @@ The GME repository itself, its compiler toolchain, and any dependencies the back
 
 `pythonPath` must point at an interpreter that has the backend's own dependencies installed, plus version-matched `deepseek-harness-sdk` and `deepseek-harness-runtime-bin` wheels — the backend runs its coding work through the Harness Python SDK. The default is `python`; name the interpreter explicitly when the machine has several.
 
+**clang-format must be 17.0.2.** That is the version behind GME's own `check-format` target (its CI runs `pip install clang-format==17.0.2` before building that target), and clang-format judges the same source differently across major versions: a backend using whatever happened to be on PATH can report the format check passed for source the GME pipeline then rejects.
+
+- `requirements.txt` pins `clang-format==17.0.2`, so installing the dependencies as in section 1 places it at that interpreter's `Scripts\clang-format.exe`;
+- the backend resolves in the order **interpreter environment → `clang_format_path` → PATH** and accepts only a version match; a mismatch fails with both versions and the one-line fix named;
+- to use another version or another location, set `clang_format_path` in `config.local.json`, or set `allow_clang_format_version_mismatch: true` (warn instead of refuse).
+
+The backend's own environment self-check judges this by version and lists every candidate it found with its version.
+
 ## 3. The coding profile
 
 Backend coding sessions run in a separate Harness profile (named by `dsh_profile` in `config.local.json`, conventionally `sdk`). It needs:
@@ -81,6 +89,7 @@ The composed tree prints the `gme-workflow` row with its `!!js` expressions verb
 | `The configured port is not an authenticated GME backend` | Another service already holds `port` | Pick a free port, or stop that service; the plugin will not start a second worker over it |
 | `GME backend exited during startup` | The Python entrypoint failed immediately | Run `python backend/run_backend.py --config config.local.json` by hand to see the real error (missing dependencies, bad paths) |
 | Tool calls work but a task never progresses | The backend job is executing, or a submission was interrupted | Poll with `gme_check`; after a timeout, inspect tasks before resubmitting, because POSTs are never retried automatically |
+| `clang-format 17.0.2 is required …, but found: … (22.1.8)` | PATH holds a different major version, and the backend refuses to judge formatting with it | `python -m pip install clang-format==17.0.2` in that interpreter; or point `clang_format_path` at a 17.0.2 binary; or set `allow_clang_format_version_mismatch: true` to accept the mismatch |
 
 ## 6. Optional: knowledge injection and trace observability
 

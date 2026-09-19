@@ -30,6 +30,14 @@ GME 仓库本身、编译工具链，以及后端构建/测试阶段需要的依
 
 `pythonPath` 必须指向一个已安装后端自身依赖的解释器，并在其中安装版本匹配的 `deepseek-harness-sdk` 与 `deepseek-harness-runtime-bin` wheel——后端的编码工作通过 Harness Python SDK 执行。默认值是 `python`；机器上有多个解释器时请显式写清楚。
 
+**clang-format 必须是 17.0.2。** GME 自己的 `check-format` 目标用的就是这个版本（CI 先 `pip install clang-format==17.0.2` 再构建该目标），而 clang-format 跨大版本对同一份源码的判决会不一致：后端若用 PATH 上碰巧存在的版本，就可能对 GME 流水线随后拒绝的源码报"格式检查通过"。
+
+- `requirements.txt` 已钉 `clang-format==17.0.2`，按第 1 节装完依赖后它就在该解释器的 `Scripts\clang-format.exe`；
+- 后端按**解释器环境 → `clang_format_path` → PATH** 选取，且只接受版本匹配的那个；不匹配直接报错，信息里写明找到的版本与修法；
+- 需要别的版本或别的安装位置时，在 `config.local.json` 里设 `clang_format_path`，或设 `allow_clang_format_version_mismatch: true`（只警告、不拒绝）。
+
+后端的环境自检会按版本检查这一项，detail 里列出它找到的每个候选及其版本。
+
 ## 3. 编码配置
 
 后端编码会话运行在另一个 Harness profile 中（由 `config.local.json` 里的 `dsh_profile` 指定，惯例名是 `sdk`）。它需要：
@@ -81,6 +89,7 @@ dsh --profile web --dump-config
 | `The configured port is not an authenticated GME backend` | 端口已被其他服务占用 | 换一个空闲端口，或停止那个服务；插件不会在其上再启动一个 worker |
 | `GME backend exited during startup` | Python 入口立即退出 | 手工运行 `python backend/run_backend.py --config config.local.json` 看真实报错（依赖缺失、路径不对） |
 | 工具能调用但任务不推进 | 任务正在执行，或某次提交被中断 | 用 `gme_check` 轮询；超时后先查询任务再决定是否重发，因为 POST 不会自动重试 |
+| `clang-format 17.0.2 is required …, but found: … (22.1.8)` | PATH 上只有别的版本，后端拒绝用不同大版本的 clang-format 判定格式 | 在该解释器里 `python -m pip install clang-format==17.0.2`；或设 `clang_format_path` 指向 17.0.2；或设 `allow_clang_format_version_mismatch: true` 接受不一致 |
 
 ## 6. 可选：知识注入与轨迹可观测
 
