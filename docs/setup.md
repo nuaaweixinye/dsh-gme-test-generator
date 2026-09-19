@@ -2,9 +2,9 @@
 
 [中文](setup.zh.md) | English
 
-`dsh-gme-workflow` is a client of an existing GME Test Agent checkout. It starts and talks to that project's local HTTP backend; it does not ship, copy or replace it. This page is the checklist for that side of the wiring.
+`dsh-gme-workflow` is a client of an existing GME Test Generator checkout. It starts and talks to that project's local HTTP backend; it does not ship, copy or replace it. This page is the checklist for that side of the wiring.
 
-## 1. The GME Test Agent checkout
+## 1. The GME Test Generator checkout
 
 First, get the checkout itself. **It is not bundled with this plugin.** The public copy — the framework, without GME-specific generated data — is [nuaaweixinye/gme-agent](https://github.com/nuaaweixinye/gme-agent):
 
@@ -53,8 +53,8 @@ The outer workflow dialogue and every backend coding session keep separate histo
 Either set the environment before starting Harness:
 
 ```powershell
-$env:GME_TEST_AGENT_ROOT  = 'D:/workspace/gme-test-agent'
-$env:GME_TEST_AGENT_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'
+$env:GME_TEST_GENERATOR_ROOT  = 'D:/workspace/gme-test-generator'
+$env:GME_TEST_GENERATOR_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'
 dsh web
 ```
 
@@ -63,7 +63,7 @@ These are read at start: changing them requires a restart. Or override the row i
 ```yaml
 - id: gme-workflow
   config:
-    backendRoot: D:/workspace/gme-agent
+    backendRoot: D:/workspace/gme-test-generator
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
     port: 8765
     autoStart: true
@@ -81,11 +81,11 @@ The composed tree prints the `gme-workflow` row with its `!!js` expressions verb
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| No `gme_*` tools after a restart — the plugin is running but registers none, and logs `backendRoot is not configured` | `backendRoot` unset, so the row resolved to an empty path | Set `GME_TEST_AGENT_ROOT` before starting Harness, or override the row with an explicit `backendRoot`. The model has been told these steps and will report them if the user asks |
+| No `gme_*` tools after a restart — the plugin is running but registers none, and logs `backendRoot is not configured` | `backendRoot` unset, so the row resolved to an empty path | Set `GME_TEST_GENERATOR_ROOT` before starting Harness, or override the row with an explicit `backendRoot`. The legacy `GME_TEST_AGENT_ROOT` remains accepted. |
 | `dsh: 1 entry did not activate` at boot, naming this entry | A hand-edited row whose config fails validation (for example `backendRoot: null` in an `!!js` expression) | Fix or remove the override; the shipped row degrades to "unconfigured", it never throws |
 | `Cannot read GME API token file: …` | `tokenFile` missing while `autoStart: false` | Create the token file (≥32 characters) or allow automatic startup |
 | `GME autoStart requires a Harness subprocess provider` | The profile has no local `subprocess` service | Use a base-backed profile, which provides one |
-| `GME backend is unavailable. Start GME Test Agent or enable autoStart.` | Nothing is listening on the port and automatic startup is off | Start the backend yourself, or set `autoStart: true` |
+| `GME backend is unavailable. Start GME Test Generator or enable autoStart.` | Nothing is listening on the port and automatic startup is off | Start the backend yourself, or set `autoStart: true` |
 | `The configured port is not an authenticated GME backend` | Another service already holds `port` | Pick a free port, or stop that service; the plugin will not start a second worker over it |
 | `GME backend exited during startup` | The Python entrypoint failed immediately | Run `python backend/run_backend.py --config config.local.json` by hand to see the real error (missing dependencies, bad paths) |
 | Tool calls work but a task never progresses | The backend job is executing, or a submission was interrupted | Poll with `gme_check`; after a timeout, inspect tasks before resubmitting, because POSTs are never retried automatically |

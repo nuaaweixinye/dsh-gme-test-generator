@@ -9,7 +9,7 @@ import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 
 /** Fully resolved deployment settings; model input cannot alter these paths. */
 export interface BackendOptions {
-  /** Existing GME Test Agent checkout used as the worker directory. */
+  /** Existing GME Test Generator checkout used as the worker directory. */
   backendRoot: string
   /** Python executable with the backend's dependencies installed. */
   pythonPath: string
@@ -83,7 +83,7 @@ export class Backend {
     }
     if (this.token.length < 32) throw new Error('GME API token must contain at least 32 characters')
     if (await this.isReady()) return
-    if (!this.options.autoStart) throw new Error('GME backend is unavailable. Start GME Test Agent or enable autoStart.')
+    if (!this.options.autoStart) throw new Error('GME backend is unavailable. Start GME Test Generator or enable autoStart.')
     const subprocess = this.ctx.get('subprocess')
     if (!subprocess) throw new Error('GME autoStart requires a Harness subprocess provider')
     const executable = await subprocess.resolveExecutable(this.options.pythonPath)

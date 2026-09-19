@@ -2,14 +2,14 @@
 
 English | [中文](README.zh.md)
 
-GME Test Agent workflows inside [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`): three tools that pick interfaces, drive autonomous test generation and repair in a local Python backend, poll the task until review, and gate outward actions behind explicit user consent.
+GME Test Generator workflows inside [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (`dsh`): three tools that pick interfaces, drive autonomous test generation and repair in a local Python backend, poll the task until review, and gate outward actions behind explicit user consent.
 
-This is a community plugin, not an official DeepSeek package, and it needs an existing GME Test Agent checkout with its Python dependencies — it drives that project rather than replacing it.
+This is a community plugin, not an official DeepSeek package, and it needs an existing GME Test Generator checkout with its Python dependencies — it drives that project rather than replacing it.
 
 ## Requirements
 
 - DeepSeek Harness `0.1.2-alpha.1` or newer on the `0.1.x` line, with a base-backed profile that provides `tools` and `systemPrompt`.
-- A GME Test Agent checkout containing `backend/run_backend.py`, its `config.local.json`, its task database, and the GME repository and compiler toolchain it needs. **The backend is not bundled with this plugin**: its public copy — the framework, without GME-specific generated data — is [nuaaweixinye/gme-agent](https://github.com/nuaaweixinye/gme-agent), which documents cloning, configuration and how to generate the interface catalogs locally: clone it, run `scripts\install.ps1 -GmeRepo <your GME checkout>`, then `scripts\run_web.ps1`. The full checkout, which additionally carries those generated catalogs and the internal notes, is private: access is granted per person by [@nuaaweixinye](https://github.com/nuaaweixinye).
+- A GME Test Generator checkout containing `backend/run_backend.py`, its `config.local.json`, its task database, and the GME repository and compiler toolchain it needs. **The backend is not bundled with this plugin**: its public copy — the framework, without GME-specific generated data — is [nuaaweixinye/gme-agent](https://github.com/nuaaweixinye/gme-agent), which documents cloning, configuration and how to generate the interface catalogs locally: clone it, run `scripts\install.ps1 -GmeRepo <your GME checkout>`, then `scripts\run_web.ps1`. The full checkout, which additionally carries those generated catalogs and the internal notes, is private: access is granted per person by [@nuaaweixinye](https://github.com/nuaaweixinye).
 - A Python interpreter with that backend's dependencies installed, plus matching `deepseek-harness-sdk` and `deepseek-harness-runtime-bin` wheels in it, and **clang-format 17.0.2** — the version behind GME's own `check-format` target; the backend refuses to judge formatting with another major version (section 2 of the setup doc).
 - For automatic startup, a local `subprocess` service in the profile (every shipped profile has one).
 
@@ -34,8 +34,8 @@ The command installs the package and appends it to the profile's `dsh.profile.bu
 **Option 1 — environment variables**, read when Harness starts:
 
 ```powershell
-$env:GME_TEST_AGENT_ROOT  = 'D:/workspace/gme-agent'
-$env:GME_TEST_AGENT_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'   # optional, default 'python'
+$env:GME_TEST_GENERATOR_ROOT  = 'D:/workspace/gme-test-generator'
+$env:GME_TEST_GENERATOR_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'   # optional, default 'python'
 dsh web
 ```
 
@@ -44,7 +44,7 @@ dsh web
 ```yaml
 - id: gme-workflow
   config:
-    backendRoot: D:/workspace/gme-agent
+    backendRoot: D:/workspace/gme-test-generator
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
     port: 8765
     autoStart: true
@@ -54,7 +54,7 @@ A patch row replaces only the keys it names, entire `config` included, so restat
 
 | Config key | Default | Meaning |
 |---|---|---|
-| `backendRoot` | *(required to enable the tools)* | GME Test Agent checkout holding `backend/run_backend.py` |
+| `backendRoot` | *(required to enable the tools)* | GME Test Generator checkout holding `backend/run_backend.py` |
 | `pythonPath` | `python` | Interpreter with the backend's dependencies |
 | `configFile` | `config.local.json` | Backend config, absolute or relative to `backendRoot` |
 | `tokenFile` | `logs/web-api-token.log` | API token; created on automatic startup when missing |
@@ -92,7 +92,7 @@ Generation and decisions can return `accepted: true`; that means queued work, no
 ```sh
 pnpm install
 pnpm run verify        # typecheck + build + tests + packaged-artefact smoke
-pnpm run test:live     # read-only smoke against a real backend (needs GME_TEST_AGENT_ROOT)
+pnpm run test:live     # read-only smoke against a real backend (needs GME_TEST_GENERATOR_ROOT)
 ```
 
 `src/backend.ts` owns authenticated transport and worker lifetime, `src/index.ts` owns tool schemas, route mapping, presentation and the unconfigured-mount guard, and `src/next-step.ts` maps backend statuses to the `suggested_next` signpost. `tests/install.spec.ts` composes the committed `cordis.patch.yml` through the include's real patch engine and mounts the resulting row into a real Loader tree. No invariant companion is published: backend state is authoritative and the plugin keeps no duplicate durable task state.

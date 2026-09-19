@@ -204,7 +204,7 @@ describe('GME workflow tools', () => {
     }) as typeof ctx.systemPrompt.section
     await ctx.plugin(Workflow, { backendRoot: '   ' })
     expect(warn).toHaveBeenCalledTimes(1)
-    expect(String(warn.mock.calls[0]?.[0])).toMatch(/GME_TEST_AGENT_ROOT/)
+    expect(String(warn.mock.calls[0]?.[0])).toMatch(/GME_TEST_GENERATOR_ROOT/)
     // The model has to learn how to finish the setup: the tools are absent, and
     // no other surface describes them.
     expect(sections).toHaveLength(1)

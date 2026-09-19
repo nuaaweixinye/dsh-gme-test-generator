@@ -28,7 +28,8 @@ import * as Workflow from '../src/index.ts'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const PACKAGE_NAME = 'dsh-gme-workflow'
 const ROW_ID = 'gme-workflow'
-const ROOT_ENV = 'GME_TEST_AGENT_ROOT'
+const ROOT_ENV = 'GME_TEST_GENERATOR_ROOT'
+const LEGACY_ROOT_ENV = 'GME_TEST_AGENT_ROOT'
 
 const cleanups: Array<() => Promise<unknown> | unknown> = []
 const savedEnv = new Map<string, string | undefined>()
@@ -163,7 +164,9 @@ describe('the committed dsh.bundle.patch', () => {
 
   it('carries the deployment paths as expressions, never as machine paths', async () => {
     const row = await insertedRow()
-    expect((row.config as Record<string, unknown>).backendRoot).toEqual({ __jsExpr: `process.env.${ROOT_ENV} ?? ''` })
+    expect((row.config as Record<string, unknown>).backendRoot).toEqual({
+      __jsExpr: `process.env.${ROOT_ENV} ?? process.env.${LEGACY_ROOT_ENV} ?? ''`,
+    })
     // The row is mounted even when nothing is configured, so it must not carry a
     // guard: the plugin answers an unconfigured install with setup guidance
     // instead of staying unloaded.
@@ -182,6 +185,7 @@ describe('the committed dsh.bundle.patch', () => {
 describe('a freshly installed, unconfigured row', () => {
   it('mounts the plugin, registers no tools, and tells the model how to configure it', async () => {
     setEnv(ROOT_ENV, undefined)
+    setEnv(LEGACY_ROOT_ENV, undefined)
     const { ctx, imported, sections } = await mount(await insertedRow())
     // The module must load: a setup hint can only reach the model from a plugin
     // that is actually mounted.
@@ -191,7 +195,7 @@ describe('a freshly installed, unconfigured row', () => {
     expect(sections[0]?.name).toBe('gme-workflow')
     expect(sections[0]?.text).toMatch(/NOT available/)
     expect(sections[0]?.text).toContain('https://github.com/nuaaweixinye/gme-agent')
-    expect(sections[0]?.text).toContain('GME_TEST_AGENT_ROOT')
+    expect(sections[0]?.text).toContain(ROOT_ENV)
     expect(sections[0]?.text).toMatch(/install\.ps1/)
   })
 })
@@ -212,5 +216,16 @@ describe('a row pointed at a configured checkout', () => {
     const gated = await call(ctx, 'gme_decide', { decision: 'delete_job', job_id: 'job-1' })
     expect(gated.isError).toBe(true)
     expect(JSON.stringify(gated)).toMatch(/explicit user consent/)
+  })
+
+  it('accepts the legacy checkout variable during migration', async () => {
+    setEnv(ROOT_ENV, undefined)
+    setEnv(LEGACY_ROOT_ENV, await checkoutFixture())
+    const row = await insertedRow()
+    ;(row.config as Record<string, unknown>).autoStart = false
+    ;(row.config as Record<string, unknown>).port = await stubBackend()
+    const { ctx } = await mount(row)
+    const checked = await call(ctx, 'gme_check', { resource: 'jobs' })
+    expect(checked.isError).not.toBe(true)
   })
 })

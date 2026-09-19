@@ -2,14 +2,14 @@
 
 [English](README.md) | 中文
 
-在 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（`dsh`）里驱动 GME Test Agent 的工作流：三个工具负责挑选接口、在本地 Python 后端中自主完成测试生成与修复、轮询任务直到待评审，并把对外动作挡在用户显式同意之后。
+在 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（`dsh`）里驱动 GME Test Generator 的工作流：三个工具负责挑选接口、在本地 Python 后端中自主完成测试生成与修复、轮询任务直到待评审，并把对外动作挡在用户显式同意之后。
 
-这是一个社区插件，不是 DeepSeek 官方包；它需要你已经有一份 GME Test Agent 源码目录及其 Python 依赖——它驱动那个工程，而不是替代它。
+这是一个社区插件，不是 DeepSeek 官方包；它需要你已经有一份 GME Test Generator 源码目录及其 Python 依赖——它驱动那个工程，而不是替代它。
 
 ## 前置条件
 
 - DeepSeek Harness `0.1.x` 线上 `0.1.2-alpha.1` 或更新版本，且 profile 基于 base、提供 `tools` 与 `systemPrompt`。
-- 一份 GME Test Agent 源码目录，包含 `backend/run_backend.py`、`config.local.json`、任务数据库，以及它需要的 GME 仓库与编译工具链。**该后端不随本插件分发**：它的公开副本（framework 本体，不含 GME 专有生成数据）在 [nuaaweixinye/gme-agent](https://github.com/nuaaweixinye/gme-agent)，克隆、配置与接口目录生成方式见它的 README：克隆后跑 `scripts\install.ps1 -GmeRepo <你的 GME 检出>`，再 `scripts\run_web.ps1`。完整检出（额外含生成的接口目录与内部笔记）为私有，访问权限由 [@nuaaweixinye](https://github.com/nuaaweixinye) 按人授予。
+- 一份 GME Test Generator 源码目录，包含 `backend/run_backend.py`、`config.local.json`、任务数据库，以及它需要的 GME 仓库与编译工具链。**该后端不随本插件分发**：它的公开副本（framework 本体，不含 GME 专有生成数据）在 [nuaaweixinye/gme-agent](https://github.com/nuaaweixinye/gme-agent)，克隆、配置与接口目录生成方式见它的 README：克隆后跑 `scripts\install.ps1 -GmeRepo <你的 GME 检出>`，再 `scripts\run_web.ps1`。完整检出（额外含生成的接口目录与内部笔记）为私有，访问权限由 [@nuaaweixinye](https://github.com/nuaaweixinye) 按人授予。
 - 一个装好后端依赖的 Python 解释器，并在其中安装版本匹配的 `deepseek-harness-sdk` 与 `deepseek-harness-runtime-bin` wheel，以及 **clang-format 17.0.2**——GME 自身 `check-format` 目标所用的版本；后端拒绝用其他大版本判定格式（见配置文档第 2 节）。
 - 若需要自动启动，profile 中要有本机 `subprocess` 服务（所有随附 profile 都有）。
 
@@ -34,8 +34,8 @@ dsh plugin --profile web add dsh-gme-workflow
 **方式一 —— 环境变量**，在 Harness 启动时读取：
 
 ```powershell
-$env:GME_TEST_AGENT_ROOT  = 'D:/workspace/gme-agent'
-$env:GME_TEST_AGENT_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'   # 可选，默认 'python'
+$env:GME_TEST_GENERATOR_ROOT  = 'D:/workspace/gme-test-generator'
+$env:GME_TEST_GENERATOR_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'   # 可选，默认 'python'
 dsh web
 ```
 
@@ -44,7 +44,7 @@ dsh web
 ```yaml
 - id: gme-workflow
   config:
-    backendRoot: D:/workspace/gme-agent
+    backendRoot: D:/workspace/gme-test-generator
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
     port: 8765
     autoStart: true
@@ -54,7 +54,7 @@ dsh web
 
 | 配置键 | 默认值 | 含义 |
 |---|---|---|
-| `backendRoot` | *必填* | 含 `backend/run_backend.py` 的 GME Test Agent 源码目录 |
+| `backendRoot` | *必填* | 含 `backend/run_backend.py` 的 GME Test Generator 源码目录 |
 | `pythonPath` | `python` | 装好后端依赖的解释器 |
 | `configFile` | `config.local.json` | 后端配置，绝对路径或相对 `backendRoot` |
 | `tokenFile` | `logs/web-api-token.log` | API token；自动启动时缺失会创建 |
@@ -92,7 +92,7 @@ dsh web
 ```sh
 pnpm install
 pnpm run verify        # 类型检查 + 构建 + 测试 + 发布产物冒烟
-pnpm run test:live     # 对真实后端只读冒烟（需要 GME_TEST_AGENT_ROOT）
+pnpm run test:live     # 对真实后端只读冒烟（需要 GME_TEST_GENERATOR_ROOT）
 ```
 
 `src/backend.ts` 管理身份验证、HTTP 与后台进程，`src/index.ts` 管理工具定义、路由映射、结果展示与“未配置即不注册”的守卫，`src/next-step.ts` 将后端状态映射为 `suggested_next` 路标。`tests/install.spec.ts` 用 include 真实的补丁引擎组合仓库里的 `cordis.patch.yml`，并把得到的条目挂进真实 Loader 树。插件不复制后端持久化任务状态，因此不提供 invariant companion：后端状态是权威来源。

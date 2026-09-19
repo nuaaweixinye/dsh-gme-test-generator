@@ -6,8 +6,8 @@ import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import Tools from '@deepseek-ai/dsh-tools'
 import * as Workflow from '../lib/index.js'
 
-const backendRoot = process.env.GME_TEST_AGENT_ROOT
-assert(backendRoot, 'Set GME_TEST_AGENT_ROOT to the existing backend checkout')
+const backendRoot = process.env.GME_TEST_GENERATOR_ROOT ?? process.env.GME_TEST_AGENT_ROOT
+assert(backendRoot, 'Set GME_TEST_GENERATOR_ROOT to the existing backend checkout')
 const ctx = new Context()
 try {
   await ctx.plugin(SystemPrompt)

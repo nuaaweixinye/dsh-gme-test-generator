@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3
+
+- Rename the backend product to GME Test Generator in current runtime copy and
+  documentation.
+- Prefer `GME_TEST_GENERATOR_ROOT` and `GME_TEST_GENERATOR_PYTHON`, while
+  retaining the former `GME_TEST_AGENT_*` variables as migration aliases.
+
 ## 0.1.2
 
 Documentation and setup-guidance release; the tools, schemas and transport are

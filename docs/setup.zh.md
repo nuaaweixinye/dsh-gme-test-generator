@@ -2,9 +2,9 @@
 
 [English](setup.md) | 中文
 
-`dsh-gme-workflow` 是一份现有 GME Test Agent 源码目录的客户端：它启动并访问那个工程自己的本地 HTTP 后端，不随包分发、不复制、也不替代它。本页是那一侧的配置清单。
+`dsh-gme-workflow` 是一份现有 GME Test Generator 源码目录的客户端：它启动并访问那个工程自己的本地 HTTP 后端，不随包分发、不复制、也不替代它。本页是那一侧的配置清单。
 
-## 1. GME Test Agent 源码目录
+## 1. GME Test Generator 源码目录
 
 先拿到这份检出本身。它**不随本插件分发**。公开副本（framework 本体，不含 GME 专有生成数据）在 [nuaaweixinye/gme-agent](https://github.com/nuaaweixinye/gme-agent)：
 
@@ -53,8 +53,8 @@ GME 仓库本身、编译工具链，以及后端构建/测试阶段需要的依
 要么在启动 Harness 前设置环境变量：
 
 ```powershell
-$env:GME_TEST_AGENT_ROOT  = 'D:/workspace/gme-test-agent'
-$env:GME_TEST_AGENT_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'
+$env:GME_TEST_GENERATOR_ROOT  = 'D:/workspace/gme-test-generator'
+$env:GME_TEST_GENERATOR_PYTHON = 'C:/ProgramData/Miniconda3/envs/agent/python.exe'
 dsh web
 ```
 
@@ -63,7 +63,7 @@ dsh web
 ```yaml
 - id: gme-workflow
   config:
-    backendRoot: D:/workspace/gme-agent
+    backendRoot: D:/workspace/gme-test-generator
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
     port: 8765
     autoStart: true
@@ -81,11 +81,11 @@ dsh --profile web --dump-config
 
 | 现象 | 原因 | 处理 |
 |---|---|---|
-| 重启后没有 `gme_*` 工具：插件在运行但不注册任何工具，并记录 `backendRoot is not configured` | 未设置 `backendRoot`，条目解析为空路径 | 启动 Harness 前设置 `GME_TEST_AGENT_ROOT`，或用明确的 `backendRoot` 覆盖该条目。模型已经被告知这些步骤，用户问起时它会说明 |
+| 重启后没有 `gme_*` 工具：插件在运行但不注册任何工具，并记录 `backendRoot is not configured` | 未设置 `backendRoot`，条目解析为空路径 | 启动 Harness 前设置 `GME_TEST_GENERATOR_ROOT`，或用明确的 `backendRoot` 覆盖该条目。旧的 `GME_TEST_AGENT_ROOT` 仍兼容。 |
 | 启动时报 `dsh: 1 entry did not activate` 并指出该条目 | 手工改过的条目配置校验失败（例如 `!!js` 表达式里的 `backendRoot: null`） | 修正或删除该覆盖；随包条目只会退化为“未配置”，不会抛错 |
 | `Cannot read GME API token file: …` | `autoStart: false` 而 `tokenFile` 不存在 | 创建 token 文件（≥32 字符），或允许自动启动 |
 | `GME autoStart requires a Harness subprocess provider` | profile 没有本机 `subprocess` 服务 | 使用基于 base 的 profile，它自带该服务 |
-| `GME backend is unavailable. Start GME Test Agent or enable autoStart.` | 端口上没有服务，且自动启动关闭 | 自行启动后端，或设 `autoStart: true` |
+| `GME backend is unavailable. Start GME Test Generator or enable autoStart.` | 端口上没有服务，且自动启动关闭 | 自行启动后端，或设 `autoStart: true` |
 | `The configured port is not an authenticated GME backend` | 端口已被其他服务占用 | 换一个空闲端口，或停止那个服务；插件不会在其上再启动一个 worker |
 | `GME backend exited during startup` | Python 入口立即退出 | 手工运行 `python backend/run_backend.py --config config.local.json` 看真实报错（依赖缺失、路径不对） |
 | 工具能调用但任务不推进 | 任务正在执行，或某次提交被中断 | 用 `gme_check` 轮询；超时后先查询任务再决定是否重发，因为 POST 不会自动重试 |

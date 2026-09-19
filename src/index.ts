@@ -1,4 +1,4 @@
-/** GME Test Agent workflow tools; Coding runs through a separate Harness SDK profile. */
+/** GME Test Generator workflow tools; coding runs through a separate Harness SDK profile. */
 import { resolve } from 'node:path'
 import type { Context } from '@deepseek-ai/cordis'
 import { defineTool } from '@deepseek-ai/dsh-tools'
@@ -10,7 +10,7 @@ import { suggestedNextForReply } from './next-step.ts'
 /** Trusted deployment options, never exposed as model arguments. */
 export interface Config extends Partial<Omit<BackendOptions, 'backendRoot'>> {
   /**
-   * GME Test Agent checkout containing backend/run_backend.py. Empty means
+   * GME Test Generator checkout containing backend/run_backend.py. Empty means
    * "not configured": `apply` then registers nothing and warns, because this
    * plugin must never be the entry that takes the whole plugin tree down at
    * boot. An installed-but-unconfigured plugin is inert, not fatal.
@@ -97,11 +97,11 @@ const WORKFLOW_GUIDANCE = 'GME workflow: pick interfaces (gme_check), generate (
  */
 const SETUP_GUIDANCE = [
   'GME workflow plugin: installed but not configured — gme_generate, gme_check and gme_decide are NOT available, and no GME backend is running. Say that plainly instead of describing a workflow that cannot run, and never invent a backend path.',
-  'To enable it the user must supply a GME Test Agent checkout and restart Harness:',
+  'To enable it the user must supply a GME Test Generator checkout and restart Harness:',
   '1. Get the backend — it is not bundled with this plugin. Clone https://github.com/nuaaweixinye/gme-agent (the framework; module interface catalogs are generated from a GME checkout, and the project is Windows-oriented).',
   '2. In that checkout run `scripts\\install.ps1 -GmeRepo <GME checkout>`: it checks the toolchain, creates .venv, installs the two pinned DeepSeek Harness wheels (they are not on PyPI) plus requirements (which pin clang-format 17.0.2 — the version GME\'s own check-format target runs), writes config.local.json, and prints the snippet for step 4. Start the backend with `scripts\\run_web.ps1`, or let this plugin start it — autoStart is on by default and a healthy backend on the configured port is reused.',
   '3. In config.local.json set gme_repo_path to the GME checkout under test and dsh_home to the Harness home holding DeepSeek credentials (dsh_profile defaults to sdk). The PR steps also need an authenticated GitHub CLI.',
-  '4. Point this plugin at that checkout: export GME_TEST_AGENT_ROOT=<checkout> and optionally GME_TEST_AGENT_PYTHON=<interpreter> (default: python on PATH) before Harness starts, or put the row below in $DSH_HOME/profiles/<profile>/cordis.patch.yml, then restart `dsh web`:',
+  '4. Point this plugin at that checkout: export GME_TEST_GENERATOR_ROOT=<checkout> and optionally GME_TEST_GENERATOR_PYTHON=<interpreter> (default: python on PATH) before Harness starts, or put the row below in $DSH_HOME/profiles/<profile>/cordis.patch.yml, then restart `dsh web`. The legacy GME_TEST_AGENT_ROOT and GME_TEST_AGENT_PYTHON names remain accepted during migration:',
   '   - id: gme-workflow',
   '     config:',
   '       backendRoot: <checkout>',
@@ -126,7 +126,7 @@ export function apply(ctx: Context, config: Config): void {
     ctx.systemPrompt.section({ name: 'gme-workflow', order: 145, text: SETUP_GUIDANCE })
     ctx.logger.warn(
       'gme-workflow: backendRoot is not configured, so no GME tools were registered. '
-      + 'Set GME_TEST_AGENT_ROOT before starting Harness, or override the gme-workflow row in the profile patch. '
+      + 'Set GME_TEST_GENERATOR_ROOT before starting Harness, or override the gme-workflow row in the profile patch. '
       + 'See the README for the full configuration; the model has been told these steps and will report them.',
     )
     return

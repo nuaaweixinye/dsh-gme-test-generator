@@ -1,7 +1,7 @@
 {
   "name": "dsh-gme-workflow",
-  "version": "0.1.2",
-  "description": "GME Test Agent workflow tools for DeepSeek Harness: pick interfaces, run autonomous test generation and repair through a local Python backend, poll progress, and decide with consent.",
+  "version": "0.1.3",
+  "description": "GME Test Generator workflow tools for DeepSeek Harness: pick interfaces, run autonomous test generation and repair through a local Python backend, poll progress, and decide with consent.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
