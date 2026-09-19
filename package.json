@@ -1,6 +1,6 @@
 {
-  "name": "dsh-gme-workflow",
-  "version": "0.1.3",
+  "name": "dsh-gme-test-generator",
+  "version": "0.2.0",
   "description": "GME Test Generator workflow tools for DeepSeek Harness: pick interfaces, run autonomous test generation and repair through a local Python backend, poll progress, and decide with consent.",
   "type": "module",
   "main": "lib/index.js",
@@ -13,6 +13,7 @@
     "lib",
     "cordis.patch.yml",
     "docs",
+    "!docs/superpowers",
     "README.md",
     "README.zh.md",
     "CHANGELOG.md",
@@ -29,11 +30,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nuaaweixinye/dsh-gme-workflow.git"
+    "url": "git+https://github.com/nuaaweixinye/dsh-gme-test-generator.git"
   },
-  "homepage": "https://github.com/nuaaweixinye/dsh-gme-workflow",
+  "homepage": "https://github.com/nuaaweixinye/dsh-gme-test-generator",
   "bugs": {
-    "url": "https://github.com/nuaaweixinye/dsh-gme-workflow/issues"
+    "url": "https://github.com/nuaaweixinye/dsh-gme-test-generator/issues"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

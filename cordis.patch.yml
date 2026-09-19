@@ -1,8 +1,8 @@
-# dsh-gme-workflow bundle patch — the `dsh.bundle.patch` layer of this package.
+# dsh-gme-test-generator bundle patch — the `dsh.bundle.patch` layer of this package.
 #
-#   dsh plugin --profile web add dsh-gme-workflow
+#   dsh plugin --profile web add dsh-gme-test-generator
 #
-# installs the package and appends `dsh-gme-workflow` to the profile's
+# installs the package and appends `dsh-gme-test-generator` to the profile's
 # `dsh.profile.bundles`; the next boot merges THIS patch (a single `insert` of
 # the plugin row). No profile file has to be edited by hand.
 #
@@ -26,7 +26,7 @@
 # 2. A profile patch override. `- id:` replaces only the keys it names, whole
 #    `config` included, so restate every field you keep:
 #
-#      - id: gme-workflow
+#      - id: gme-test-generator
 #        config:
 #          backendRoot: D:/workspace/gme-agent
 #          pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
@@ -36,8 +36,8 @@
 # Nothing else listens on `port`, and an independently started GME backend on
 # that port is reused rather than replaced.
 - insert:
-    - id: gme-workflow
-      name: 'dsh-gme-workflow'
+    - id: gme-test-generator
+      name: 'dsh-gme-test-generator'
       config:
         backendRoot: !!js process.env.GME_TEST_GENERATOR_ROOT ?? process.env.GME_TEST_AGENT_ROOT ?? ''
         pythonPath: !!js process.env.GME_TEST_GENERATOR_PYTHON ?? process.env.GME_TEST_AGENT_PYTHON ?? 'python'

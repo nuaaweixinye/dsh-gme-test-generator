@@ -13,10 +13,12 @@ import Tools from '@deepseek-ai/dsh-tools'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const entry = join(root, 'lib', 'index.js')
+const manifest = JSON.parse(await import('node:fs/promises').then(({ readFile }) => readFile(join(root, 'package.json'), 'utf8')))
+assert.ok(manifest.files.includes('!docs/superpowers'), 'public tarball must exclude internal migration plans and specs')
 assert(existsSync(entry), `missing ${entry} — run the build first (pnpm run build)`)
 
 const Workflow = await import(pathToFileURL(entry).href)
-assert.equal(Workflow.name, 'gme-workflow')
+assert.equal(Workflow.name, 'gme-test-generator')
 assert.deepEqual(Workflow.inject, ['tools', 'systemPrompt'])
 assert.equal(typeof Workflow.apply, 'function')
 assert.ok(Workflow.Config, 'the Config schema must be exported for the Loader to validate a row')

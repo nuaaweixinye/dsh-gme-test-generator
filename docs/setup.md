@@ -2,7 +2,7 @@
 
 [中文](setup.zh.md) | English
 
-`dsh-gme-workflow` is a client of an existing GME Test Generator checkout. It starts and talks to that project's local HTTP backend; it does not ship, copy or replace it. This page is the checklist for that side of the wiring.
+`dsh-gme-test-generator` is a client of an existing GME Test Generator checkout. It starts and talks to that project's local HTTP backend; it does not ship, copy or replace it. This page is the checklist for that side of the wiring.
 
 ## 1. The GME Test Generator checkout
 
@@ -61,7 +61,7 @@ dsh web
 These are read at start: changing them requires a restart. Or override the row in the profile patch (`$DSH_HOME/profiles/web/cordis.patch.yml`); a patch row replaces only the keys it names, so keep every field you still want:
 
 ```yaml
-- id: gme-workflow
+- id: gme-test-generator
   config:
     backendRoot: D:/workspace/gme-test-generator
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
@@ -75,7 +75,7 @@ Confirm what the profile will actually mount before restarting:
 dsh --profile web --dump-config
 ```
 
-The composed tree prints the `gme-workflow` row with its `!!js` expressions verbatim, so an unresolved or overridden value is visible without booting.
+The composed tree prints the `gme-test-generator` row with its `!!js` expressions verbatim, so an unresolved or overridden value is visible without booting.
 
 ## 5. Troubleshooting
 

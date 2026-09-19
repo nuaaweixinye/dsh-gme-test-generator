@@ -1,4 +1,4 @@
-# dsh-gme-workflow
+# dsh-gme-test-generator
 
 English | [中文](README.zh.md)
 
@@ -22,7 +22,7 @@ The backend repository ships its own reference docs: `docs/backend-overview.md` 
 From the plugin market (Settings → Plugin Market) — one click — or:
 
 ```sh
-dsh plugin --profile web add dsh-gme-workflow
+dsh plugin --profile web add dsh-gme-test-generator
 ```
 
 The command installs the package and appends it to the profile's `dsh.profile.bundles`; this package ships a `dsh.bundle.patch` layer, so **no profile file needs editing**. Restart `dsh web` afterwards.
@@ -42,7 +42,7 @@ dsh web
 **Option 2 — a profile patch**, in `$DSH_HOME/profiles/<profile>/cordis.patch.yml`:
 
 ```yaml
-- id: gme-workflow
+- id: gme-test-generator
   config:
     backendRoot: D:/workspace/gme-test-generator
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe

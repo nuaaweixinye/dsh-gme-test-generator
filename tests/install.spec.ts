@@ -26,8 +26,8 @@ import Tools from '@deepseek-ai/dsh-tools'
 import * as Workflow from '../src/index.ts'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const PACKAGE_NAME = 'dsh-gme-workflow'
-const ROW_ID = 'gme-workflow'
+const PACKAGE_NAME = 'dsh-gme-test-generator'
+const ROW_ID = 'gme-test-generator'
 const ROOT_ENV = 'GME_TEST_GENERATOR_ROOT'
 const LEGACY_ROOT_ENV = 'GME_TEST_AGENT_ROOT'
 
@@ -192,10 +192,11 @@ describe('a freshly installed, unconfigured row', () => {
     expect(imported).toEqual([PACKAGE_NAME])
     expect((await call(ctx, 'gme_check', { resource: 'jobs' })).isError).toBe(true)
     expect(sections).toHaveLength(1)
-    expect(sections[0]?.name).toBe('gme-workflow')
+    expect(sections[0]?.name).toBe(ROW_ID)
     expect(sections[0]?.text).toMatch(/NOT available/)
     expect(sections[0]?.text).toContain('https://github.com/nuaaweixinye/gme-agent')
     expect(sections[0]?.text).toContain(ROOT_ENV)
+    expect(sections[0]?.text).toContain('- id: gme-test-generator')
     expect(sections[0]?.text).toMatch(/install\.ps1/)
   })
 })

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0
+
+- Rename the package to `dsh-gme-test-generator`, the GitHub repository to
+  `nuaaweixinye/dsh-gme-test-generator`, and the Cordis loader ID to
+  `gme-test-generator`.
+- Keep the public workflow tools `gme_generate`, `gme_check`, and `gme_decide`
+  unchanged.
+- Continue accepting the former `GME_TEST_AGENT_*` environment variables as
+  migration aliases for the current `GME_TEST_GENERATOR_*` names.
+
 ## 0.1.3
 
 - Rename the backend product to GME Test Generator in current runtime copy and

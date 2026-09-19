@@ -1,4 +1,4 @@
-# dsh-gme-workflow
+# dsh-gme-test-generator
 
 [English](README.md) | 中文
 
@@ -22,10 +22,10 @@ Python 后端通过 DeepSeek Harness Python SDK 在独立的 `sdk` 配置中执�
 在插件市场（设置 → 插件市场）一键安装，或者：
 
 ```sh
-dsh plugin --profile web add dsh-gme-workflow
+dsh plugin --profile web add dsh-gme-test-generator
 ```
 
-该命令会安装本包，并把 `dsh-gme-workflow` 追加到 profile 的 `dsh.profile.bundles`；本包自带 `dsh.bundle.patch` 层，因此**无需手工编辑任何 profile 文件**。之后重启 `dsh web` 即可。
+该命令会安装本包，并把 `dsh-gme-test-generator` 追加到 profile 的 `dsh.profile.bundles`；本包自带 `dsh.bundle.patch` 层，因此**无需手工编辑任何 profile 文件**。之后重启 `dsh web` 即可。
 
 ## 配置
 
@@ -42,7 +42,7 @@ dsh web
 **方式二 —— profile 补丁**，写在 `$DSH_HOME/profiles/<profile>/cordis.patch.yml`：
 
 ```yaml
-- id: gme-workflow
+- id: gme-test-generator
   config:
     backendRoot: D:/workspace/gme-test-generator
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe

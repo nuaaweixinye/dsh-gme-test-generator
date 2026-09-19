@@ -17,7 +17,7 @@ const cleanups: Array<() => Promise<unknown>> = []
 afterEach(async () => { while (cleanups.length) await cleanups.pop()!() })
 
 async function setup(overrides: Partial<Workflow.Config> = {}, throughLoader = false) {
-  const root = await mkdtemp(join(tmpdir(), 'gme-workflow-'))
+  const root = await mkdtemp(join(tmpdir(), 'gme-test-generator-'))
   cleanups.push(() => rm(root, { recursive: true, force: true }))
   await mkdir(join(root, 'logs'))
   const token = 'test-gme-token-'.repeat(4)
@@ -56,7 +56,7 @@ async function setup(overrides: Partial<Workflow.Config> = {}, throughLoader = f
     await ctx.plugin(Loader)
     ctx.loader.builtins.include = Include
     const modules = new Map<string, unknown>([
-      ['@deepseek-ai/dsh-system-prompt', SystemPrompt], ['@deepseek-ai/dsh-tools', Tools], ['dsh-gme-workflow', Workflow],
+      ['@deepseek-ai/dsh-system-prompt', SystemPrompt], ['@deepseek-ai/dsh-tools', Tools], ['dsh-gme-test-generator', Workflow],
     ])
     ctx.loader.internal = { version: 'v2', async import(specifier: string) {
       if (!modules.has(specifier)) throw new Error(`Unexpected Loader module ${specifier}`)
@@ -64,7 +64,7 @@ async function setup(overrides: Partial<Workflow.Config> = {}, throughLoader = f
     } } as unknown as NonNullable<typeof ctx.loader.internal>
     const configPath = join(root, 'cordis.yml')
     await writeFile(configPath, JSON.stringify([
-      { name: '@deepseek-ai/dsh-system-prompt' }, { name: '@deepseek-ai/dsh-tools' }, { name: 'dsh-gme-workflow', config },
+      { name: '@deepseek-ai/dsh-system-prompt' }, { name: '@deepseek-ai/dsh-tools' }, { name: 'dsh-gme-test-generator', config },
     ]))
     await ctx.loader.create({ name: 'cordis:include', config: { path: pathToFileURL(configPath).href } })
     await ctx.loader.await()
@@ -208,11 +208,11 @@ describe('GME workflow tools', () => {
     // The model has to learn how to finish the setup: the tools are absent, and
     // no other surface describes them.
     expect(sections).toHaveLength(1)
-    expect(sections[0]?.name).toBe('gme-workflow')
+    expect(sections[0]?.name).toBe('gme-test-generator')
     expect(sections[0]?.text).toMatch(/NOT available/)
     expect(sections[0]?.text).toContain('https://github.com/nuaaweixinye/gme-agent')
     expect(sections[0]?.text).toMatch(/install\.ps1/)
-    expect(sections[0]?.text).toContain('- id: gme-workflow')
+    expect(sections[0]?.text).toContain('- id: gme-test-generator')
     expect(sections[0]?.text).toMatch(/generate_interface_catalog\.py/)
   })
 })

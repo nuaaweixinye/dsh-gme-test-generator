@@ -2,7 +2,7 @@
 
 [English](setup.md) | 中文
 
-`dsh-gme-workflow` 是一份现有 GME Test Generator 源码目录的客户端：它启动并访问那个工程自己的本地 HTTP 后端，不随包分发、不复制、也不替代它。本页是那一侧的配置清单。
+`dsh-gme-test-generator` 是一份现有 GME Test Generator 源码目录的客户端：它启动并访问那个工程自己的本地 HTTP 后端，不随包分发、不复制、也不替代它。本页是那一侧的配置清单。
 
 ## 1. GME Test Generator 源码目录
 
@@ -61,7 +61,7 @@ dsh web
 这些值在启动时读取：改动后需要重启。要么在 profile 补丁（`$DSH_HOME/profiles/web/cordis.patch.yml`）里覆盖该条目——补丁条目只替换它写明的键，所以想保留的字段要全部重述：
 
 ```yaml
-- id: gme-workflow
+- id: gme-test-generator
   config:
     backendRoot: D:/workspace/gme-test-generator
     pythonPath: C:/ProgramData/Miniconda3/envs/agent/python.exe
@@ -75,7 +75,7 @@ dsh web
 dsh --profile web --dump-config
 ```
 
-组合后的条目会原样打印 `gme-workflow` 行及其 `!!js` 表达式，因此无需真正启动就能看出值是否被解析或被覆盖。
+组合后的条目会原样打印 `gme-test-generator` 行及其 `!!js` 表达式，因此无需真正启动就能看出值是否被解析或被覆盖。
 
 ## 5. 故障排查
 

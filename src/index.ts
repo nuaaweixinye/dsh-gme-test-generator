@@ -20,7 +20,7 @@ export interface Config extends Partial<Omit<BackendOptions, 'backendRoot'>> {
   pageChars?: number
 }
 
-export const name = 'gme-workflow'
+export const name = 'gme-test-generator'
 export const inject = ['tools', 'systemPrompt']
 export const Config: z<Config> = z.object({
   backendRoot: z.string().default(''), pythonPath: z.string().default('python'),
@@ -102,7 +102,7 @@ const SETUP_GUIDANCE = [
   '2. In that checkout run `scripts\\install.ps1 -GmeRepo <GME checkout>`: it checks the toolchain, creates .venv, installs the two pinned DeepSeek Harness wheels (they are not on PyPI) plus requirements (which pin clang-format 17.0.2 — the version GME\'s own check-format target runs), writes config.local.json, and prints the snippet for step 4. Start the backend with `scripts\\run_web.ps1`, or let this plugin start it — autoStart is on by default and a healthy backend on the configured port is reused.',
   '3. In config.local.json set gme_repo_path to the GME checkout under test and dsh_home to the Harness home holding DeepSeek credentials (dsh_profile defaults to sdk). The PR steps also need an authenticated GitHub CLI.',
   '4. Point this plugin at that checkout: export GME_TEST_GENERATOR_ROOT=<checkout> and optionally GME_TEST_GENERATOR_PYTHON=<interpreter> (default: python on PATH) before Harness starts, or put the row below in $DSH_HOME/profiles/<profile>/cordis.patch.yml, then restart `dsh web`. The legacy GME_TEST_AGENT_ROOT and GME_TEST_AGENT_PYTHON names remain accepted during migration:',
-  '   - id: gme-workflow',
+  '   - id: gme-test-generator',
   '     config:',
   '       backendRoot: <checkout>',
   '       pythonPath: <interpreter>',
@@ -123,10 +123,10 @@ export function apply(ctx: Context, config: Config): void {
   // procedure, because a missing backend is a deployment decision the user has
   // to make; throwing here would instead fail the whole plugin tree at boot.
   if (settings.backendRoot.trim() === '') {
-    ctx.systemPrompt.section({ name: 'gme-workflow', order: 145, text: SETUP_GUIDANCE })
+    ctx.systemPrompt.section({ name: 'gme-test-generator', order: 145, text: SETUP_GUIDANCE })
     ctx.logger.warn(
-      'gme-workflow: backendRoot is not configured, so no GME tools were registered. '
-      + 'Set GME_TEST_GENERATOR_ROOT before starting Harness, or override the gme-workflow row in the profile patch. '
+      'gme-test-generator: backendRoot is not configured, so no GME tools were registered. '
+      + 'Set GME_TEST_GENERATOR_ROOT before starting Harness, or override the gme-test-generator row in the profile patch. '
       + 'See the README for the full configuration; the model has been told these steps and will report them.',
     )
     return
@@ -147,7 +147,7 @@ export function apply(ctx: Context, config: Config): void {
       ? { ...(failure.data as Record<string, JsonValue>), observations: observations.data } : failure.data
     return renderPage(merged, failure.httpStatus, typeof (failure.data as { job_id?: unknown } | null)?.job_id === 'string' ? (failure.data as { job_id: string }).job_id : null, offset, settings.pageChars)
   }
-  ctx.systemPrompt.section({ name: 'gme-workflow', order: 145, text: WORKFLOW_GUIDANCE })
+  ctx.systemPrompt.section({ name: 'gme-test-generator', order: 145, text: WORKFLOW_GUIDANCE })
   ctx.tools.register(defineTool({
     name: 'gme_generate', description: 'Autonomously drive GME test generation and repair: create tasks from interfaces or a goal, batch, fix recorded failures, extend or retry a task. Poll progress with gme_check until needs_review, then report and wait for the user.',
     parameters: {
